@@ -1,25 +1,12 @@
 import numpy as np
-
-
-def to_transform(vocab, targets, unknown_value):
-    sources = []
-    for t in targets:
-        if t in vocab:
-            s = vocab[t]
-        else:
-            s = unknown_value
-        sources.append(s)
-    return sources
+import pickle
+from utils import to_transform, laplace_smoothing
 
 
 def random_vector(size):
     r = np.random.uniform(0, 1, size=size)
     s = np.sum(r)
     return r / s
-
-
-def laplace_smoothing(x, y, c, smooth=1e-6):
-    return (x + smooth) / (y + c * smooth)
 
 
 class HMM:
@@ -43,7 +30,16 @@ class HMM:
             self.B = B
             self.pi = pi
         elif save_file:
-            pass
+            with open(save_file) as f:
+                data = pickle.load(f)
+            self.A = data["A"]
+            self.B = data["A"]
+            self.pi = data["pi"]
+
+    def save_param(self, save_file: str):
+        data = {"A": self.A, "B": self.B, "pi": self.pi}
+        with open(save_file, "w") as f:
+            pickle.dump(data, f)
 
     def param_initialization(self):
         self.pi = random_vector(self.state_num)
